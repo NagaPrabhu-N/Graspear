@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <title>Login Form</title>
+</head>
+<body>
+    <div class="login-container" id="loginContainer">
+        <h2>Login</h2>
+        <div class="button-group">
+            <button onclick="showForm('employee')">Employee</button>
+            <button onclick="showForm('boss')">Boss</button>
+        </div>
+        <form id="loginForm" class="hidden" onsubmit="handleLogin(event)">
+            <div class="form-group">
+                <label for="username">Username:</label>
+                <input type="text" id="username" name="username" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            <input type="hidden" id="role" name="role">
+            <button type="submit" class="submit-btn">Login</button>
+        </form>
+    </div>
+
+    <div class="box-container hidden" id="boxContainer">
+        <div class="top-head">
+            <h1> <i class="fa-regular fa-calendar"></i> Task Management</h1>
+            <button onclick="logout()" class="log-out"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
+        </div>
+        <div class="task-container">
+            <div class="column left">
+                <div class="task-section" style="background-color: #6998e9;" onclick="showTaskList()">
+                 <i class="fa-solid fa-list-check" style="font-size: xx-large; color: rgb(152, 152, 39);"></i>
+                    <h2>Task List</h2>
+                </div>
+                <div class="task-section"  onclick="assignTask()">
+                    <i class="fa-solid fa-plus" style="font-size: xx-large; color: rgb(152, 152, 39);"></i>
+                    <h2> Assign Task</h2>
+                </div>
+                <div class="filter-section">
+                    <h2>Filter Tasks</h2>
+                    <label style="margin-bottom: 4%;" for="priorityFilter">Priority:</label>
+                    <select id="priorityFilter" style="margin-bottom: 4%;">
+                        <option value="">All</option>
+                        <option value="High">High</option>
+                        <option value="Medium">Medium</option>
+                        <option value="Low">Low</option>
+                    </select>
+                    <br>
+                
+                    <label for="dueDateFilter" style="margin-bottom: 2%;">Due Date:</label>
+                    <input type="date" id="dueDateFilter" style="margin-bottom: 4%; width: 50%;">
+                    <br>
+                    <button style="border: blue; margin-bottom: 4%; background-color: blueviolet; color: white; font-size: large; border-radius: 32px;
+                    cursor: pointer;" onclick="applyFilter()">Apply Filter</button>
+                </div>
+                
+            </div>
+            <div class="column right" id="rightContent">
+                <table id="taskTable">
+                    <thead>
+                        <tr>
+                            <th>S.No</th>
+                            <th>Task Title</th>
+                            <th>Assigned To</th>
+                            <th>Start Time</th>
+                            <th>End Time</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Rows will be dynamically added here -->
+                    </tbody>
+                </table>
+                
+                <!-- ------------------------------------------- -->
+                <table id="invisibleTable" style="display: none;">
+                    <thead>
+                        <tr>
+                            <th>Task Name</th>
+                            <th>Planned Duration</th>
+                            <th>Time Range</th>
+                            <th>Priority</th>
+                            <th>Due Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Hidden data rows will be added here -->
+                    </tbody>
+                </table>
+                
+            </div>
+        </div>
+    </div>
+    <!-- ----------------------------------------------- -->
+     
+
+    <!-- ----------------------------------------------- -->
+    <div id="assignTaskModal" class="modal hidden">
+        <div class="modal-content">
+            <h2>Assign Task</h2>
+            <form id="assignTaskForm" onsubmit="submitTask(event)">
+                <div class="form-group">
+                    <label for="taskName">Task Name:</label>
+                    <input type="text" id="taskName" required>
+                </div>
+                <div class="form-group">
+                    <label for="description">Description:</label>
+                    <textarea id="description" rows="3" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="assignedTo">Assigned To:</label>
+                    <input type="text" id="assignedTo" required>
+                </div>
+                <div class="form-group">
+                    <label for="duration">Planned Duration (hours):</label>
+                    <input type="number" id="duration" min="1" required>
+                </div>
+                <div class="form-group">
+                    <label for="timeRange">Planned Time Range:</label>
+                    <input type="time" id="timeRange" required>
+                </div>
+                <div class="form-group">
+                    <label for="priority">Priority:</label>
+                    <select id="priority" required>
+                        <option value="">Select</option>
+                        <option value="High">High</option>
+                        <option value="Medium">Medium</option>
+                        <option value="Low">Low</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="dueDate">Due Date:</label>
+                    <input type="date" id="dueDate" required>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="submit-btn">Submit</button>
+                    <button type="button" class="cancel-btn" onclick="closeModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- --------------------------- -->
+</div>
+<!-- Detail Modal -->
+<div id="detailTaskModal" style="display: none;">
+    <div class="detail-modal-content">
+        <h2>Task Details</h2>
+        <p id="detailTaskName"></p>
+        <p id="detailDescription"></p>
+        <p id="detailAssignedTo"></p>
+        <p id="detailDuration"></p>
+        <p id="detailTimeRange"></p>
+        <p id="detailPriority"></p>
+        <p id="detailDueDate"></p>
+        <button onclick="closeDetailModal()" style="color: white; background-color: red; font-weight: 600; font-size: large; border-radius: 12px;">CLOSE</button>
+    </div>
+</div>
+
+
+<!-- /////////////////////////////////////////////// -->
+
+<div class="emp-container hidden" id="empContainer">
+    <div class="top-head">
+        <h1> <i class="fa-regular fa-calendar"></i>Task Management</h1>
+        <button onclick="logout()" class="log-out"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
+    </div>
+    <div class="emp-task-container">
+        <div class="column emp-left">
+            <div class="emp-task-section" style="background-color: #8a4e4e;" onclick="showTaskList()">
+             <i class="fa-solid fa-list-check" style="font-size: xx-large; color: rgb(152, 152, 39);"></i>
+                <h2>Task List</h2>
+            </div>
+        </div>
+        <div class="column emp-right" id="rightContent">
+            <table id="taskTable" border="1" style="width: 100%; text-align: center; border-collapse: collapse;">
+                <thead>
+                    <tr>
+                        <th>S.No</th>
+                        <th>Task Title</th>
+                        <th>Assigned To</th>
+                        <th>Start Time</th>
+                        <th>End Time</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Rows will be dynamically added here -->
+                </tbody>
+            </table>
+            
+            <!-- ------------------------------------------- -->
+            <table id="invisibleTable" style="display: none;">
+                <thead>
+                    <tr>
+                        <th>Task Name</th>
+                        <th>Planned Duration</th>
+                        <th>Time Range</th>
+                        <th>Priority</th>
+                        <th>Due Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Hidden data rows will be added here -->
+                </tbody>
+            </table>
+            
+        </div>
+    </div>
+</div>
+
+<div id="detailEmpTaskModal" style="display: none;">
+<div class="detail-emp-modal-content">
+    <h2>Task Details</h2>
+    <p id="detailTaskName"></p>
+    <p id="detailDescription"></p>
+    <p id="detailAssignedTo"></p>
+    <p id="detailDuration"></p>
+    <p id="detailTimeRange"></p>
+    <p id="detailPriority"></p>
+    <p id="detailDueDate"></p>
+    <button onclick="closeDetailModal()" style="color: white; background-color: red; font-weight: 600; font-size: large; border-radius: 12px;">CLOSE</button>
+</div>
+</div>
+ <!-- ///////////////////////////////////////////////// -->
+    <script src="script.js"></script>
+    </body>
+</html>
